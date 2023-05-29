@@ -24,7 +24,8 @@ class TodoScreenController extends GetxController {
 
   void onCheckBoxChanged(bool? value, int index) {
     final todo = todoList[index];
-    todoList[index] = todo.copyWith(isCompleted: value ?? false);
+    final updatedTodo = todo.copyWith(isCompleted: value ?? false);
+    todoList[index] = updatedTodo;
   }
 
   void onDeletePressed(int index) {
