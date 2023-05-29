@@ -22,6 +22,7 @@ class _TodoScreenState extends State<TodoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[200],
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -77,6 +78,7 @@ class _TodoScreenState extends State<TodoScreen> {
         ],
       ),
       appBar: AppBar(
+        backgroundColor: Colors.cyan,
         actions: [
           IconButton(
             onPressed: () {},
