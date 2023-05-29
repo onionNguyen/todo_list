@@ -22,7 +22,6 @@ class _TodoScreenState extends State<TodoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200],
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -41,19 +40,59 @@ class _TodoScreenState extends State<TodoScreen> {
                   ),
                 ],
               ),
-              body: Column(
-                children: [
-                  GenericTextField(
-                      labelText: 'Task',
-                      controller: controller.titleController),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  GenericTextField(
-                    labelText: 'Description',
-                    controller: controller.descriptionController,
-                  ),
-                ],
+              body: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    GenericTextField(
+                        labelText: 'Task',
+                        controller: controller.titleController),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    GenericTextField(
+                      labelText: 'Description',
+                      controller: controller.descriptionController,
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconRow(
+                            title: 'Set Time:',
+                            iconButton: IconButton(
+                              onPressed: () {
+                                showTimePicker(
+                                    context: context,
+                                    initialTime: TimeOfDay.now());
+                              },
+                              icon: const Icon(Icons.timer,
+                                  size: 40,
+                                  color: Color.fromARGB(255, 197, 95, 129)),
+                            ),
+                          ),
+                          IconRow(
+                              title: 'Set Date:',
+                              iconButton: IconButton(
+                                onPressed: () {
+                                  showDatePicker(
+                                      context: context,
+                                      initialDate: DateTime.now(),
+                                      firstDate: DateTime.now(),
+                                      lastDate: DateTime.now()
+                                          .add(const Duration(days: 90)));
+                                },
+                                icon: const Icon(
+                                  Icons.calendar_today,
+                                  size: 40,
+                                  color: Color.fromARGB(255, 197, 95, 129),
+                                ),
+                              ))
+                        ])
+                  ],
+                ),
               ),
             ),
             context: context,
@@ -61,48 +100,95 @@ class _TodoScreenState extends State<TodoScreen> {
         },
         child: const Icon(Icons.add),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
-        onTap: (index) {
-          controller.isCompleted.value = index == 1;
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: 'Tasks',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.check),
-            label: 'Completed',
-          ),
-        ],
-      ),
+      bottomNavigationBar: Obx(() => BottomNavigationBar(
+            currentIndex: controller.tabIndex.value,
+            onTap: (index) {
+              controller.tabIndex.value = index;
+              controller.isCompleted.value = index == 1;
+            },
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.list),
+                label: 'Tasks',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.check),
+                label: 'Completed',
+              ),
+            ],
+          )),
       appBar: AppBar(
-        backgroundColor: Colors.cyan,
         actions: [
           IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.calendar_month),
+            onPressed: () {
+              showDatePicker(
+                context: context,
+                initialDate: DateTime.now(),
+                firstDate: DateTime(2021),
+                lastDate: DateTime(2025),
+              );
+            },
+            icon: const Icon(
+              Icons.calendar_month,
+              size: 30,
+              color: Color.fromARGB(255, 197, 95, 129),
+            ),
           ),
         ],
-        title: const Text('Todo List'),
+        title: const Text('Todo List',
+            style: TextStyle(
+                fontSize: 30, color: Color.fromARGB(255, 197, 95, 129))),
       ),
       body: Obx(() {
         final todos = controller.getTodoList(controller.isCompleted.value);
         return ListView.builder(
           itemCount: todos.length,
           itemBuilder: (context, index) {
-            return TodoWidgets(
-                todo: todos[index],
-                onChanged: (value) {
-                  controller.onCheckBoxChanged(value, index);
-                },
-                onDeleted: () {
-                  controller.onDeletePressed(index);
-                });
+            return Dismissible(
+              onDismissed: (direction) {
+                controller.onDeletePressed(index);
+              },
+              background: Container(
+                color: Colors.red,
+                child: const Icon(
+                  Icons.delete,
+                  color: Colors.white,
+                ),
+              ),
+              key: ValueKey(todos[index].id),
+              child: TodoWidgets(
+                  key: ValueKey(todos[index].id),
+                  todo: todos[index],
+                  onChanged: (value) {
+                    controller.onCheckBoxChanged(value, index);
+                  },
+                  onDeleted: () {
+                    controller.onDeletePressed(index);
+                  }),
+            );
           },
         );
       }),
+    );
+  }
+}
+
+class IconRow extends StatelessWidget {
+  const IconRow({super.key, required this.title, required this.iconButton});
+
+  final String title;
+  final Widget iconButton;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(title),
+        const SizedBox(
+          width: 16,
+        ),
+        iconButton
+      ],
     );
   }
 }
