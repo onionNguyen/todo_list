@@ -10,11 +10,15 @@ class TodoScreenController extends GetxController {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final RxBool isCompleted = false.obs;
+  final _todos = <Todo>[].obs;
+  List<Todo> get todos => _todos.toList();
+  RxInt tabIndex = 0.obs;
 
   // Create task function
   void createTask(String task, String description) {
     final newTodo = Todo(
       title: task,
+      id: UniqueKey().toString(),
       description: description,
     );
     todoList.add(newTodo);
@@ -34,5 +38,11 @@ class TodoScreenController extends GetxController {
 
   List<Todo> getTodoList(bool isCompleted) {
     return todoList.where((todo) => todo.isCompleted == isCompleted).toList();
+  }
+
+  void createTimer(int index) {
+    final todo = todoList[index];
+    final updatedTodo = todo.copyWith(date: DateTime.now());
+    todoList[index] = updatedTodo;
   }
 }
